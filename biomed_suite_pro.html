@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioMed Research Suite Pro • Advanced Integrated Platform</title>
+<meta name="description" content="Professional computational biology platform with integrated workflows">
+<meta name="theme-color" content="#0f172a">
+
+<!-- Core Libraries -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<script src="https://unpkg.com/recharts@2/umd/Recharts.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+
+<style>
+:root {
+  --bg: #0a0e1a;
+  --panel: #0f1419;
+  --card: #1a1f2e;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #3b82f6;
+  --accent-bright: #60a5fa;
+  --line: #1e293b;
+  --green: #10b981;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --purple: #8b5cf6;
+  --cyan: #06b6d4;
+  --pink: #ec4899;
+  --orange: #f97316;
+  --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.98); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Header */
+.app-header {
+  background: var(--panel);
+  border-bottom: 2px solid var(--line);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+}
+
+.header-content {
+  max-width: 1800px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-icon {
+  width: 45px;
+  height: 45px;
+  background: var(--gradient-3);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  animation: pulse 3s infinite;
+}
+
+.brand-text h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  background: var(--gradient-3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-text p {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: -2px;
+}
+
+.status-bar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--card);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 1.5s infinite;
+}
+
+/* Container */
+.container {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 2rem;
+  animation: fadeIn 0.5s ease;
+}
+
+/* Workflow Navigation */
+.workflow-nav {
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--line);
+}
+
+.workflow-steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.workflow-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.workflow-step::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  right: -50%;
+  height: 2px;
+  background: var(--line);
+  z-index: 0;
+}
+
+.workflow-step:last-child::before {
+  display: none;
+}
+
+.step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.5rem;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.workflow-step.active .step-circle {
+  background: var(--accent);
+  border-color: var(--accent-bright);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.workflow-step.completed .step-circle {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.step-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.workflow-step.active .step-label {
+  color: var(--accent-bright);
+  font-weight: 600;
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+/* Form Elements */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.form-helper {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.form-select, .form-input {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.form-select:focus, .form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-select option {
+  background: var(--card);
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input-addon {
+  padding: 0.75rem 1rem;
+  background: var(--line);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-success {
+  background: var(--green);
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-warning {
+  background: var(--orange);
+  color: white;
+}
+
+.btn-secondary {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--line);
+  border-color: var(--accent);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Grid Layouts */
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-sidebar {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-sidebar { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* Progress Bar */
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--yellow);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--red);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-info {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--accent-bright);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-purple {
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--purple);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+/* Stat Cards */
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-3);
+}
+
+.stat-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: var(--gradient-3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-trend {
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.trend-up {
+  color: var(--green);
+}
+
+.trend-down {
+  color: var(--red);
+}
+
+/* Table */
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: var(--bg);
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+th {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+tbody tr {
+  transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+  background: var(--bg);
+}
+
+/* Canvas */
+canvas {
+  border-radius: 8px;
+  background: var(--bg);
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--line);
+}
+
+/* Alert */
+.alert {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: start;
+  gap: 1rem;
+  animation: slideInRight 0.3s ease;
+}
+
+.alert-info {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--accent-bright);
+}
+
+.alert-success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--green);
+}
+
+.alert-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--yellow);
+}
+
+.alert-danger {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--red);
+}
+
+/* Loading Spinner */
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner-lg {
+  width: 40px;
+  height: 40px;
+  border-width: 4px;
+}
+
+/* Tabs */
+.tabs {
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 1.5rem;
+}
+
+.tab-list {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tab-button {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-weight: 600;
+}
+
+.tab-button:hover {
+  color: var(--text);
+}
+
+.tab-button.active {
+  color: var(--accent-bright);
+  border-bottom-color: var(--accent);
+}
+
+/* Tooltip */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 0.5rem;
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  position: sticky;
+  top: 100px;
+}
+
+.sidebar-section {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+/* Info Panel */
+.info-panel {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+}
+
+.info-panel-content {
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+/* Results Panel */
+.results-panel {
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid var(--line);
+  margin-top: 2rem;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--line);
+}
+
+.results-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: var(--gradient-3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Export Menu */
+.export-menu {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .app-header {
+    padding: 1rem;
+  }
+
+  .brand-text h1 {
+    font-size: 1.2rem;
+  }
+
+  .status-bar {
+    display: none;
+  }
+
+  .workflow-steps {
+    flex-direction: column;
+  }
+
+  .workflow-step::before {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+const { LineChart, Line, BarChart, Bar, AreaChart, Area, ScatterChart, Scatter,
+        RadarChart, Radar, PieChart, Pie, Cell, ComposedChart,
+        XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+        PolarGrid, PolarAngleAxis, PolarRadiusAxis } = Recharts;
+
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://127.0.0.1:5000'
+  : '';
+
+// ============================================================================
+// MAIN APPLICATION
+// ============================================================================
+
+const BioMedResearchSuitePro = () => {
+  // Workflow state
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState([]);
+  
+  // Docking state
+  const [selectedProtein, setSelectedProtein] = useState('');
+  const [selectedLigand, setSelectedLigand] = useState('');
+  const [dockingResults, setDockingResults] = useState(null);
+  const [isDocking, setIsDocking] = useState(false);
+  const [dockingProgress, setDockingProgress] = useState(0);
+  
+  // Cell dynamics state
+  const [selectedCellLine, setSelectedCellLine] = useState('HeLa');
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [experimentData, setExperimentData] = useState([]);
+  const [cellPopulation, setCellPopulation] = useState([]);
+  const [simulationTime, setSimulationTime] = useState(0);
+  
+  // Integration state
+  const [drugConcentration, setDrugConcentration] = useState(10);
+  const [predictedEfficacy, setPredictedEfficacy] = useState(null);
+  
+  // Canvas refs
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+  
+  // Active tab
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Databases
+  const proteinDatabase = {
+    '1HVH': { name: 'HIV-1 Protease', pdb: '1HVH', resolution: 1.8, organism: 'HIV-1', class: 'Protease' },
+    '2OXY': { name: 'Cyclooxygenase-2 (COX-2)', pdb: '2OXY', resolution: 2.1, organism: 'Human', class: 'Cyclooxygenase' },
+    '4DKL': { name: 'μ-opioid receptor', pdb: '4DKL', resolution: 2.8, organism: 'Mouse', class: 'GPCR' },
+    '5R81': { name: 'EGFR Kinase Domain', pdb: '5R81', resolution: 2.3, organism: 'Human', class: 'Kinase' },
+    '6LU7': { name: 'SARS-CoV-2 Main Protease', pdb: '6LU7', resolution: 2.16, organism: 'SARS-CoV-2', class: 'Protease' }
+  };
+
+  const ligandLibrary = {
+    'aspirin': { name: 'Aspirin', smiles: 'CC(=O)Oc1ccccc1C(=O)O', mw: 180.16, logP: 1.19, class: 'NSAID' },
+    'ibuprofen': { name: 'Ibuprofen', smiles: 'CC(C)Cc1ccc(cc1)C(C)C(=O)O', mw: 206.28, logP: 3.97, class: 'NSAID' },
+    'morphine': { name: 'Morphine', smiles: 'CN1CCC23C4C1CC5=C2C(=C(C=C5)O)OC3C(C=C4)O', mw: 285.34, logP: 0.89, class: 'Opioid' },
+    'remdesivir': { name: 'Remdesivir', smiles: 'CCC(CC)COC(=O)C(C)NP(=O)(OCC1C(C(C(O1)C#N)(C(=O)OC)C)O)OC2=CC=CC3=C2N=CN=C3N', mw: 602.58, logP: 1.9, class: 'Antiviral' },
+    'dexamethasone': { name: 'Dexamethasone', smiles: 'CC1CC2C3CCC4=CC(=O)C=CC4(C3(C(CC2(C1(C(=O)CO)O)C)O)F)C', mw: 392.46, logP: 1.83, class: 'Corticosteroid' },
+    'gefitinib': { name: 'Gefitinib', smiles: 'COc1cc2ncnc(c2cc1OCCCN1MORPHOLINE)Nc1ccc(cc1)F', mw: 446.9, logP: 3.7, class: 'TKI' }
+  };
+
+  const cellLineDatabase = {
+    'HeLa': {
+      name: 'HeLa',
+      type: 'Cancer',
+      origin: 'Cervical carcinoma',
+      doublingTime: 24,
+      receptors: ['EGFR', 'VEGFR'],
+      mutations: ['HPV-18', 'TP53-null'],
+      applications: ['Cancer research', 'Virology', 'Drug screening']
+    },
+    'MCF-7': {
+      name: 'MCF-7',
+      type: 'Cancer',
+      origin: 'Breast adenocarcinoma',
+      doublingTime: 29,
+      receptors: ['ER+', 'PR+', 'HER2-'],
+      mutations: ['PIK3CA', 'CDKN2A'],
+      applications: ['Breast cancer', 'Hormone studies', 'Drug resistance']
+    },
+    'A549': {
+      name: 'A549',
+      type: 'Cancer',
+      origin: 'Lung carcinoma',
+      doublingTime: 22,
+      receptors: ['EGFR'],
+      mutations: ['KRAS G12S', 'STK11'],
+      applications: ['Lung cancer', 'Drug metabolism', 'Toxicology']
+    },
+    'HEK293': {
+      name: 'HEK293',
+      type: 'Normal (transformed)',
+      origin: 'Embryonic kidney',
+      doublingTime: 20,
+      receptors: ['Standard'],
+      mutations: ['Adenovirus E1A'],
+      applications: ['Protein production', 'Viral vectors', 'Transfection']
+    }
+  };
+
+  // Run molecular docking
+  const runDocking = async () => {
+    setIsDocking(true);
+    setDockingProgress(0);
+    
+    const interval = setInterval(() => {
+      setDockingProgress(prev => {
+        if (prev >= 95) {
+          clearInterval(interval);
+          return 95;
+        }
+        return prev + 5;
+      });
+    }, 200);
+
+    // Simulate API call
+    setTimeout(() => {
+      clearInterval(interval);
+      const modes = Array.from({ length: 9 }, (_, i) => ({
+        mode: i + 1,
+        affinity: -9.5 + Math.random() * 5 + i * 0.3,
+        rmsdLB: Math.random() * 2,
+        rmsdUB: Math.random() * 4,
+        interactions: generateInteractions(),
+        efficiency: (0.7 + Math.random() * 0.3).toFixed(3)
+      }));
+
+      setDockingResults({
+        protein: proteinDatabase[selectedProtein],
+        ligand: ligandLibrary[selectedLigand],
+        timestamp: new Date().toISOString(),
+        modes: modes.sort((a, b) => a.affinity - b.affinity),
+        bestAffinity: Math.min(...modes.map(m => m.affinity)),
+        bindingSite: {
+          volume: (450 + Math.random() * 200).toFixed(1),
+          surface: (320 + Math.random() * 150).toFixed(1),
+          depth: (12 + Math.random() * 6).toFixed(1),
+          hydrophobicity: (Math.random() * 100).toFixed(1),
+          druggability: (0.6 + Math.random() * 0.4).toFixed(3)
+        },
+        admet: calculateADMET(ligandLibrary[selectedLigand])
+      });
+
+      setDockingProgress(100);
+      setIsDocking(false);
+      setCompletedSteps([...new Set([...completedSteps, 1])]);
+      setCurrentStep(2);
+    }, 4000);
+  };
+
+  const generateInteractions = () => {
+    const interactionTypes = ['H-bond', 'Hydrophobic', 'π-π stacking', 'π-cation', 'Salt bridge', 'van der Waals'];
+    const residues = ['TYR181', 'LYS103', 'ASP25', 'GLY27', 'ILE50', 'VAL82', 'THR80', 'PRO81', 'LEU100'];
+    
+    return Array.from({ length: 4 + Math.floor(Math.random() * 5) }, () => ({
+      type: interactionTypes[Math.floor(Math.random() * interactionTypes.length)],
+      residue: residues[Math.floor(Math.random() * residues.length)],
+      distance: (2.5 + Math.random() * 2).toFixed(2),
+      energy: (-Math.random() * 4).toFixed(2),
+      strength: ['Weak', 'Moderate', 'Strong'][Math.floor(Math.random() * 3)]
+    }));
+  };
+
+  const calculateADMET = (ligand) => {
+    return {
+      absorption: {
+        humanIntestinal: (80 + Math.random() * 15).toFixed(1),
+        caco2: (-5.0 + Math.random() * 1.0).toFixed(2),
+        bioavailability: (0.45 + Math.random() * 0.45).toFixed(2)
+      },
+      distribution: {
+        vd: (0.5 + Math.random() * 2.5).toFixed(2),
+        bbbPenetration: ligand.mw < 400 && ligand.logP < 5 ? 'Yes' : 'No',
+        plasmaBinding: (70 + Math.random() * 25).toFixed(1)
+      },
+      metabolism: {
+        cyp3a4: Math.random() > 0.5 ? 'Substrate' : 'Non-substrate',
+        halfLife: (2 + Math.random() * 20).toFixed(1)
+      },
+      excretion: {
+        clearance: (0.5 + Math.random() * 3).toFixed(2),
+        renalClearance: (30 + Math.random() * 50).toFixed(1)
+      },
+      toxicity: {
+        ames: Math.random() > 0.7 ? 'Mutagenic' : 'Non-mutagenic',
+        herg: Math.random() > 0.6 ? 'Inhibitor' : 'Non-inhibitor',
+        hepatotoxicity: Math.random() > 0.75 ? 'Toxic' : 'Non-toxic'
+      }
+    };
+  };
+
+  // Predict drug efficacy
+  const predictEfficacy = () => {
+    if (!dockingResults) return;
+    
+    const affinity = Math.abs(dockingResults.bestAffinity);
+    const concentration = drugConcentration;
+    
+    // Hill equation simulation
+    const ic50 = 8.0 + Math.random() * 6;
+    const efficacy = (concentration ** 1.5) / (ic50 ** 1.5 + concentration ** 1.5) * 100;
+    
+    setPredictedEfficacy({
+      ic50: ic50.toFixed(2),
+      concentration,
+      efficacy: efficacy.toFixed(1),
+      viability: (100 - efficacy).toFixed(1),
+      bindingAffinity: dockingResults.bestAffinity,
+      recommendation: efficacy > 70 ? 'Highly effective' : efficacy > 40 ? 'Moderately effective' : 'Low efficacy'
+    });
+    
+    setCompletedSteps([...new Set([...completedSteps, 2])]);
+    setCurrentStep(3);
+  };
+
+  // Run cell simulation
+  const startCellSimulation = () => {
+    setIsSimulating(true);
+    setSimulationTime(0);
+    setExperimentData([]);
+    
+    // Initialize cells
+    const initialCells = Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 750 + 25,
+      y: Math.random() * 550 + 25,
+      radius: 8 + Math.random() * 4,
+      health: 0.85 + Math.random() * 0.15,
+      phase: ['G1', 'S', 'G2', 'M'][Math.floor(Math.random() * 4)],
+      alive: true,
+      drugExposed: predictedEfficacy !== null
+    }));
+    
+    setCellPopulation(initialCells);
+    
+    // Simulation loop
+    let time = 0;
+    const interval = setInterval(() => {
+      time += 0.5;
+      setSimulationTime(time);
+      
+      setCellPopulation(prev => {
+        let newCells = [...prev];
+        
+        // Cell division
+        if (newCells.length < 500 && Math.random() < 0.04) {
+          const parentIdx = Math.floor(Math.random() * newCells.length);
+          const parent = newCells[parentIdx];
+          if (parent.alive) {
+            const divisionFactor = predictedEfficacy ? 
+              (1 - parseFloat(predictedEfficacy.efficacy) / 200) : 1;
+            
+            if (Math.random() < divisionFactor) {
+              newCells.push({
+                id: Date.now() + Math.random(),
+                x: parent.x + (Math.random() - 0.5) * 20,
+                y: parent.y + (Math.random() - 0.5) * 20,
+                radius: 8 + Math.random() * 4,
+                health: parent.health * (0.9 + Math.random() * 0.1),
+                phase: 'G1',
+                alive: true,
+                drugExposed: parent.drugExposed
+              });
+            }
+          }
+        }
+        
+        // Drug effects
+        if (predictedEfficacy) {
+          const killRate = parseFloat(predictedEfficacy.efficacy) / 1000;
+          newCells = newCells.map(cell => {
+            if (cell.drugExposed && Math.random() < killRate) {
+              return { ...cell, health: cell.health * 0.95, alive: cell.health > 0.1 };
+            }
+            return cell;
+          });
+        }
+        
+        // Cell movement
+        return newCells.map(cell => ({
+          ...cell,
+          x: Math.max(25, Math.min(775, cell.x + (Math.random() - 0.5) * 2)),
+          y: Math.max(25, Math.min(575, cell.y + (Math.random() - 0.5) * 2))
+        }));
+      });
+      
+      // Record data
+      setExperimentData(prev => {
+        const viable = cellPopulation.filter(c => c.alive);
+        const total = cellPopulation.length;
+        
+        return [...prev, {
+          time,
+          total,
+          viable: viable.length,
+          viability: (viable.length / total * 100) || 0,
+          g1: viable.filter(c => c.phase === 'G1').length,
+          s: viable.filter(c => c.phase === 'S').length,
+          g2: viable.filter(c => c.phase === 'G2').length,
+          m: viable.filter(c => c.phase === 'M').length
+        }];
+      });
+      
+      if (time >= 72) {
+        clearInterval(interval);
+        setIsSimulating(false);
+        setCompletedSteps([...new Set([...completedSteps, 3])]);
+      }
+    }, 100);
+  };
+
+  // Canvas rendering
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const animate = () => {
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, 800, 600);
+      
+      // Grid
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < 800; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, 600);
+        ctx.stroke();
+      }
+      for (let i = 0; i < 600; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(800, i);
+        ctx.stroke();
+      }
+      
+      // Cells
+      cellPopulation.forEach(cell => {
+        if (cell.alive) {
+          const color = cell.drugExposed && cell.health < 0.5 ? 
+            `rgba(239, 68, 68, ${cell.health})` : 
+            `rgba(59, 130, 246, ${cell.health})`;
+          
+          const gradient = ctx.createRadialGradient(cell.x, cell.y, 0, cell.x, cell.y, cell.radius);
+          gradient.addColorStop(0, color);
+          gradient.addColorStop(1, color.replace(/[\d.]+\)$/, '0.2)'));
+          
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(cell.x, cell.y, cell.radius, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.strokeStyle = color.replace(/[\d.]+\)$/, '0.8)');
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      });
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animate();
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [cellPopulation]);
+
+  const stats = useMemo(() => {
+    if (!cellPopulation.length) return null;
+    const viable = cellPopulation.filter(c => c.alive);
+    return {
+      total: cellPopulation.length,
+      viable: viable.length,
+      viability: ((viable.length / cellPopulation.length) * 100).toFixed(1),
+      avgHealth: (viable.reduce((sum, c) => sum + c.health, 0) / viable.length * 100).toFixed(1),
+      proliferationRate: experimentData.length > 1 ? 
+        ((cellPopulation.length - 50) / simulationTime * 24).toFixed(2) : '0.00'
+    };
+  }, [cellPopulation, simulationTime, experimentData]);
+
+  // Export functions
+  const exportToJSON = (data, filename) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportToCSV = (data, filename) => {
+    if (!data || data.length === 0) return;
+    
+    const headers = Object.keys(data[0]);
+    const csv = [
+      headers.join(','),
+      ...data.map(row => headers.map(h => row[h]).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div>
+      {/* Header */}
+      <header className="app-header">
+        <div className="header-content">
+          <div className="brand">
+            <div className="brand-icon">🧬</div>
+            <div className="brand-text">
+              <h1>BioMed Research Suite Pro</h1>
+              <p>Advanced Integrated Computational Biology Platform</p>
+            </div>
+          </div>
+          <div className="status-bar">
+            <div className="status-item">
+              <div className="status-dot"></div>
+              <span>System Ready</span>
+            </div>
+            <div className="status-item">
+              <span>v3.0 Pro</span>
+            </div>
+            {completedSteps.length > 0 && (
+              <div className="status-item">
+                <span>✓ {completedSteps.length}/3 Steps</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="container">
+        {/* Workflow Navigation */}
+        <div className="workflow-nav">
+          <div className="workflow-steps">
+            <div className={`workflow-step ${currentStep === 1 ? 'active' : ''} ${completedSteps.includes(1) ? 'completed' : ''}`}
+                 onClick={() => setCurrentStep(1)}>
+              <div className="step-circle">
+                {completedSteps.includes(1) ? '✓' : '1'}
+              </div>
+              <div className="step-label">Molecular Docking</div>
+            </div>
+            
+            <div className={`workflow-step ${currentStep === 2 ? 'active' : ''} ${completedSteps.includes(2) ? 'completed' : ''}`}
+                 onClick={() => completedSteps.includes(1) && setCurrentStep(2)}>
+              <div className="step-circle">
+                {completedSteps.includes(2) ? '✓' : '2'}
+              </div>
+              <div className="step-label">Efficacy Prediction</div>
+            </div>
+            
+            <div className={`workflow-step ${currentStep === 3 ? 'active' : ''} ${completedSteps.includes(3) ? 'completed' : ''}`}
+                 onClick={() => completedSteps.includes(2) && setCurrentStep(3)}>
+              <div className="step-circle">
+                {completedSteps.includes(3) ? '✓' : '3'}
+              </div>
+              <div className="step-label">Cell Simulation</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Step 1: Molecular Docking */}
+        {currentStep === 1 && (
+          <div>
+            <div className="info-panel">
+              <div className="info-panel-header">
+                <span>⚛️</span>
+                <span>Step 1: Molecular Docking Analysis</span>
+              </div>
+              <div className="info-panel-content">
+                Select a protein target and ligand compound to perform molecular docking simulation. 
+                This will predict binding affinity, interaction types, and druggability scores.
+              </div>
+            </div>
+
+            <div className="grid grid-2">
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <h3 className="card-title">🎯 Target Selection</h3>
+                    <p className="card-subtitle">Choose protein target for docking</p>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Protein Target</label>
+                  <select 
+                    className="form-select"
+                    value={selectedProtein}
+                    onChange={(e) => setSelectedProtein(e.target.value)}
+                  >
+                    <option value="">Select protein...</option>
+                    {Object.entries(proteinDatabase).map(([id, protein]) => (
+                      <option key={id} value={id}>
+                        {protein.name} ({protein.pdb}) - {protein.organism}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="form-helper">High-resolution crystal structures for accurate binding prediction</p>
+                </div>
+
+                {selectedProtein && (
+                  <div className="alert alert-info">
+                    <div>
+                      <strong>Protein Details:</strong><br/>
+                      Class: {proteinDatabase[selectedProtein].class}<br/>
+                      Resolution: {proteinDatabase[selectedProtein].resolution} Å<br/>
+                      Organism: {proteinDatabase[selectedProtein].organism}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <h3 className="card-title">💊 Compound Selection</h3>
+                    <p className="card-subtitle">Choose ligand for binding analysis</p>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Ligand Compound</label>
+                  <select 
+                    className="form-select"
+                    value={selectedLigand}
+                    onChange={(e) => setSelectedLigand(e.target.value)}
+                  >
+                    <option value="">Select ligand...</option>
+                    {Object.entries(ligandLibrary).map(([id, ligand]) => (
+                      <option key={id} value={id}>
+                        {ligand.name} - {ligand.class} (MW: {ligand.mw})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="form-helper">FDA-approved and experimental compounds</p>
+                </div>
+
+                {selectedLigand && (
+                  <div className="alert alert-info">
+                    <div>
+                      <strong>Ligand Properties:</strong><br/>
+                      Class: {ligandLibrary[selectedLigand].class}<br/>
+                      Molecular Weight: {ligandLibrary[selectedLigand].mw} g/mol<br/>
+                      LogP: {ligandLibrary[selectedLigand].logP}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">⚙️ Docking Control</h3>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={runDocking}
+                  disabled={!selectedProtein || !selectedLigand || isDocking}
+                >
+                  {isDocking ? (
+                    <>
+                      <div className="spinner"></div>
+                      Running Simulation...
+                    </>
+                  ) : (
+                    <>
+                      ▶️ Run Docking Analysis
+                    </>
+                  )}
+                </button>
+
+                {isDocking && (
+                  <div style={{ flex: 1 }}>
+                    <div className="progress-container">
+                      <div className="progress-bar" style={{ width: `${dockingProgress}%` }}></div>
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+                      Analyzing binding modes: {dockingProgress}%
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Docking Results */}
+            {dockingResults && (
+              <div className="results-panel">
+                <div className="results-header">
+                  <h2 className="results-title">📊 Docking Analysis Results</h2>
+                  <div className="export-menu">
+                    <button 
+                      className="btn btn-secondary"
+                      onClick={() => exportToJSON(dockingResults, 'docking_results.json')}
+                    >
+                      💾 Export JSON
+                    </button>
+                    <button 
+                      className="btn btn-secondary"
+                      onClick={() => exportToCSV(dockingResults.modes, 'binding_modes.csv')}
+                    >
+                      📄 Export CSV
+                    </button>
+                  </div>
+                </div>
+
+                {/* Summary Stats */}
+                <div className="grid grid-4" style={{ marginBottom: '2rem' }}>
+                  <div className="stat-card">
+                    <div className="stat-value">{dockingResults.bestAffinity.toFixed(2)}</div>
+                    <div className="stat-label">Best Affinity</div>
+                    <div className="stat-trend trend-up">kcal/mol</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{dockingResults.modes.length}</div>
+                    <div className="stat-label">Binding Modes</div>
+                    <div className="stat-trend">Poses Generated</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{dockingResults.bindingSite.druggability}</div>
+                    <div className="stat-label">Druggability</div>
+                    <div className="stat-trend trend-up">Score</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-value">{dockingResults.modes[0].interactions.length}</div>
+                    <div className="stat-label">Key Interactions</div>
+                    <div className="stat-trend">Best Mode</div>
+                  </div>
+                </div>
+
+                {/* Tabs for detailed results */}
+                <div className="tabs">
+                  <div className="tab-list">
+                    <button 
+                      className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('overview')}
+                    >
+                      Overview
+                    </button>
+                    <button 
+                      className={`tab-button ${activeTab === 'interactions' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('interactions')}
+                    >
+                      Interactions
+                    </button>
+                    <button 
+                      className={`tab-button ${activeTab === 'admet' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('admet')}
+                    >
+                      ADMET
+                    </button>
+                  </div>
+                </div>
+
+                {activeTab === 'overview' && (
+                  <div>
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">📈 Binding Affinity Distribution</h3>
+                      </div>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <ComposedChart data={dockingResults.modes}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" />
+                          <XAxis dataKey="mode" stroke="var(--text)" />
+                          <YAxis stroke="var(--text)" label={{ value: 'Affinity (kcal/mol)', angle: -90, position: 'insideLeft' }} />
+                          <Tooltip 
+                            contentStyle={{ background: 'var(--card)', border: '1px solid var(--line)' }}
+                          />
+                          <Legend />
+                          <Bar dataKey="affinity" fill="var(--accent)" name="Binding Affinity" />
+                          <Line type="monotone" dataKey="efficiency" stroke="var(--green)" name="Efficiency" />
+                        </ComposedChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">📋 Binding Modes Summary</h3>
+                      </div>
+                      <div className="table-container">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Mode</th>
+                              <th>Affinity (kcal/mol)</th>
+                              <th>RMSD l.b. (Å)</th>
+                              <th>RMSD u.b. (Å)</th>
+                              <th>Interactions</th>
+                              <th>Efficiency</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dockingResults.modes.slice(0, 5).map((mode) => (
+                              <tr key={mode.mode}>
+                                <td>
+                                  {mode.mode === 1 && <span className="badge badge-success">Best</span>}
+                                  {mode.mode !== 1 && mode.mode}
+                                </td>
+                                <td>
+                                  <span className={`badge ${mode.affinity < -7 ? 'badge-success' : 'badge-warning'}`}>
+                                    {mode.affinity.toFixed(2)}
+                                  </span>
+                                </td>
+                                <td>{mode.rmsdLB.toFixed(2)}</td>
+                                <td>{mode.rmsdUB.toFixed(2)}</td>
+                                <td>{mode.interactions.length}</td>
+                                <td>
+                                  <span className="badge badge-info">{mode.efficiency}</span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'interactions' && (
+                  <div>
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">🔗 Protein-Ligand Interactions (Best Mode)</h3>
+                      </div>
+                      <div className="table-container">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Type</th>
+                              <th>Residue</th>
+                              <th>Distance (Å)</th>
+                              <th>Energy (kcal/mol)</th>
+                              <th>Strength</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dockingResults.modes[0].interactions.map((interaction, idx) => (
+                              <tr key={idx}>
+                                <td>
+                                  <span className="badge badge-purple">{interaction.type}</span>
+                                </td>
+                                <td><strong>{interaction.residue}</strong></td>
+                                <td>{interaction.distance}</td>
+                                <td>{interaction.energy}</td>
+                                <td>
+                                  <span className={`badge ${
+                                    interaction.strength === 'Strong' ? 'badge-success' :
+                                    interaction.strength === 'Moderate' ? 'badge-warning' : 'badge-info'
+                                  }`}>
+                                    {interaction.strength}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">📊 Interaction Type Distribution</h3>
+                      </div>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={Object.entries(
+                              dockingResults.modes[0].interactions.reduce((acc, int) => {
+                                acc[int.type] = (acc[int.type] || 0) + 1;
+                                return acc;
+                              }, {})
+                            ).map(([name, value]) => ({ name, value }))}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {Object.keys(dockingResults.modes[0].interactions.reduce((acc, int) => {
+                              acc[int.type] = true;
+                              return acc;
+                            }, {})).map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'][index % 6]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--line)' }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'admet' && dockingResults.admet && (
+                  <div className="grid grid-2">
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">🔬 Absorption & Distribution</h3>
+                      </div>
+                      <div style={{ padding: '1rem 0' }}>
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                            <span style={{ fontSize: '0.9rem' }}>Human Intestinal Absorption</span>
+                            <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--green)' }}>
+                              {dockingResults.admet.absorption.humanIntestinal}%
+                            </span>
+                          </div>
+                          <div className="progress-container">
+                            <div className="progress-bar" style={{ width: `${dockingResults.admet.absorption.humanIntestinal}%` }}></div>
+                          </div>
+                        </div>
+
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                            <span style={{ fontSize: '0.9rem' }}>Bioavailability</span>
+                            <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--accent)' }}>
+                              {(parseFloat(dockingResults.admet.absorption.bioavailability) * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                          <div className="progress-container">
+                            <div className="progress-bar" style={{ width: `${parseFloat(dockingResults.admet.absorption.bioavailability) * 100}%` }}></div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginTop: '1.5rem' }}>
+                          <div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>
+                              BBB Penetration
+                            </div>
+                            <span className={`badge ${dockingResults.admet.distribution.bbbPenetration === 'Yes' ? 'badge-success' : 'badge-warning'}`}>
+                              {dockingResults.admet.distribution.bbbPenetration}
+                            </span>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>
+                              Plasma Binding
+                            </div>
+                            <span className="badge badge-info">
+                              {dockingResults.admet.distribution.plasmaBinding}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">⚗️ Metabolism & Toxicity</h3>
+                      </div>
+                      <div style={{ padding: '1rem 0' }}>
+                        <div style={{ display: 'grid', gap: '1.5rem' }}>
+                          <div>
+                            <div style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+                              <strong>Metabolism</strong>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>CYP3A4</span>
+                              <span className={`badge ${dockingResults.admet.metabolism.cyp3a4 === 'Substrate' ? 'badge-warning' : 'badge-success'}`}>
+                                {dockingResults.admet.metabolism.cyp3a4}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Half-life</span>
+                              <span className="badge badge-info">
+                                {dockingResults.admet.metabolism.halfLife} hrs
+                              </span>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+                              <strong>Toxicity</strong>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Ames Test</span>
+                              <span className={`badge ${dockingResults.admet.toxicity.ames === 'Non-mutagenic' ? 'badge-success' : 'badge-danger'}`}>
+                                {dockingResults.admet.toxicity.ames}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>hERG</span>
+                              <span className={`badge ${dockingResults.admet.toxicity.herg === 'Non-inhibitor' ? 'badge-success' : 'badge-warning'}`}>
+                                {dockingResults.admet.toxicity.herg}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Hepatotoxicity</span>
+                              <span className={`badge ${dockingResults.admet.toxicity.hepatotoxicity === 'Non-toxic' ? 'badge-success' : 'badge-danger'}`}>
+                                {dockingResults.admet.toxicity.hepatotoxicity}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => setCurrentStep(2)}
+                  >
+                    Next: Predict Drug Efficacy →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 2: Efficacy Prediction */}
+        {currentStep === 2 && (
+          <div>
+            <div className="info-panel">
+              <div className="info-panel-header">
+                <span>🎯</span>
+                <span>Step 2: Drug Efficacy Prediction</span>
+              </div>
+              <div className="info-panel-content">
+                Based on the docking results, predict drug efficacy at different concentrations.
+                This integrates binding affinity with pharmacokinetic modeling.
+              </div>
+            </div>
+
+            {dockingResults && (
+              <div>
+                <div className="grid grid-2">
+                  <div className="card">
+                    <div className="card-header">
+                      <h3 className="card-title">📊 Docking Summary</h3>
+                    </div>
+                    <div>
+                      <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Compound</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: '700' }}>
+                          {dockingResults.ligand.name}
+                        </div>
+                      </div>
+                      <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Target</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: '700' }}>
+                          {dockingResults.protein.name}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Best Binding Affinity</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--green)' }}>
+                          {dockingResults.bestAffinity.toFixed(2)} kcal/mol
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="card">
+                    <div className="card-header">
+                      <h3 className="card-title">⚙️ Concentration Settings</h3>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Drug Concentration (μM)</label>
+                      <div className="input-group">
+                        <input
+                          type="number"
+                          className="form-input"
+                          value={drugConcentration}
+                          onChange={(e) => setDrugConcentration(parseFloat(e.target.value))}
+                          min="0.1"
+                          max="100"
+                          step="0.5"
+                        />
+                        <div className="input-addon">μM</div>
+                      </div>
+                      <p className="form-helper">Typical therapeutic range: 1-50 μM</p>
+                    </div>
+
+                    <div>
+                      <input
+                        type="range"
+                        min="0.1"
+                        max="100"
+                        step="0.5"
+                        value={drugConcentration}
+                        onChange={(e) => setDrugConcentration(parseFloat(e.target.value))}
+                        style={{ width: '100%' }}
+                      />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+                        <span>0.1 μM</span>
+                        <span>50 μM</span>
+                        <span>100 μM</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card">
+                  <div className="card-header">
+                    <h3 className="card-title">🎯 Prediction Control</h3>
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    onClick={predictEfficacy}
+                  >
+                    🔬 Calculate Drug Efficacy
+                  </button>
+                </div>
+
+                {predictedEfficacy && (
+                  <div className="results-panel">
+                    <div className="results-header">
+                      <h2 className="results-title">📈 Efficacy Prediction Results</h2>
+                      <button 
+                        className="btn btn-secondary"
+                        onClick={() => exportToJSON(predictedEfficacy, 'efficacy_prediction.json')}
+                      >
+                        💾 Export Results
+                      </button>
+                    </div>
+
+                    <div className="grid grid-4" style={{ marginBottom: '2rem' }}>
+                      <div className="stat-card">
+                        <div className="stat-value">{predictedEfficacy.ic50}</div>
+                        <div className="stat-label">IC50</div>
+                        <div className="stat-trend">μM</div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-value">{predictedEfficacy.efficacy}%</div>
+                        <div className="stat-label">Predicted Efficacy</div>
+                        <div className="stat-trend trend-up">Cell Kill</div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-value">{predictedEfficacy.viability}%</div>
+                        <div className="stat-label">Cell Viability</div>
+                        <div className="stat-trend trend-down">Remaining</div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-value">{predictedEfficacy.bindingAffinity.toFixed(1)}</div>
+                        <div className="stat-label">Affinity</div>
+                        <div className="stat-trend">kcal/mol</div>
+                      </div>
+                    </div>
+
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">📋 Efficacy Assessment</h3>
+                      </div>
+                      <div className="alert alert-success">
+                        <div>
+                          <strong>Recommendation:</strong> {predictedEfficacy.recommendation}
+                          <br/>
+                          At {predictedEfficacy.concentration} μM, the compound is predicted to achieve{' '}
+                          {predictedEfficacy.efficacy}% efficacy with {predictedEfficacy.viability}% cell viability remaining.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+                      <button
+                        className="btn btn-success"
+                        onClick={() => setCurrentStep(3)}
+                      >
+                        Next: Validate with Cell Simulation →
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 3: Cell Simulation */}
+        {currentStep === 3 && (
+          <div>
+            <div className="info-panel">
+              <div className="info-panel-header">
+                <span>🧫</span>
+                <span>Step 3: Cell Culture Simulation</span>
+              </div>
+              <div className="info-panel-content">
+                Simulate the drug's effects on live cell cultures. Watch real-time visualization 
+                {predictedEfficacy && ` with ${predictedEfficacy.concentration} μM drug concentration`}.
+              </div>
+            </div>
+
+            <div className="grid-sidebar">
+              <div className="sidebar">
+                <div className="sidebar-section">
+                  <h3 className="sidebar-title">Cell Line</h3>
+                  <select 
+                    className="form-select"
+                    value={selectedCellLine}
+                    onChange={(e) => setSelectedCellLine(e.target.value)}
+                    disabled={isSimulating}
+                  >
+                    {Object.entries(cellLineDatabase).map(([id, cell]) => (
+                      <option key={id} value={id}>
+                        {cell.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedCellLine && (
+                  <div className="sidebar-section">
+                    <h3 className="sidebar-title">Cell Info</h3>
+                    <div style={{ fontSize: '0.85rem', lineHeight: '1.8' }}>
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <span style={{ color: 'var(--muted)' }}>Type:</span>{' '}
+                        <span>{cellLineDatabase[selectedCellLine].type}</span>
+                      </div>
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <span style={{ color: 'var(--muted)' }}>Origin:</span>{' '}
+                        <span>{cellLineDatabase[selectedCellLine].origin}</span>
+                      </div>
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <span style={{ color: 'var(--muted)' }}>Doubling:</span>{' '}
+                        <span>{cellLineDatabase[selectedCellLine].doublingTime}h</span>
+                      </div>
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <span style={{ color: 'var(--muted)' }}>Receptors:</span>{' '}
+                        <div>
+                          {cellLineDatabase[selectedCellLine].receptors.map((r, i) => (
+                            <span key={i} className="badge badge-info" style={{ marginRight: '0.25rem', marginTop: '0.25rem' }}>
+                              {r}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {predictedEfficacy && (
+                  <div className="sidebar-section">
+                    <h3 className="sidebar-title">Treatment</h3>
+                    <div className="alert alert-warning" style={{ padding: '0.75rem' }}>
+                      <div style={{ fontSize: '0.85rem' }}>
+                        <strong>{dockingResults.ligand.name}</strong><br/>
+                        {predictedEfficacy.concentration} μM<br/>
+                        Expected: {predictedEfficacy.efficacy}% efficacy
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="sidebar-section">
+                  <button
+                    className="btn btn-primary"
+                    style={{ width: '100%' }}
+                    onClick={startCellSimulation}
+                    disabled={isSimulating}
+                  >
+                    {isSimulating ? (
+                      <>
+                        <div className="spinner"></div>
+                        Running...
+                      </>
+                    ) : (
+                      <>
+                        ▶️ Start Simulation
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {isSimulating && (
+                  <div className="sidebar-section">
+                    <h3 className="sidebar-title">Status</h3>
+                    <div style={{ fontSize: '0.9rem' }}>
+                      Time: {simulationTime.toFixed(1)}h / 72h
+                    </div>
+                    <div className="progress-container" style={{ marginTop: '0.5rem' }}>
+                      <div className="progress-bar" style={{ width: `${(simulationTime / 72) * 100}%` }}></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="card">
+                  <div className="card-header">
+                    <h3 className="card-title">👁️ Live Cell Culture</h3>
+                  </div>
+                  <canvas
+                    ref={canvasRef}
+                    width={800}
+                    height={600}
+                    style={{ width: '100%', maxWidth: '800px', display: 'block', margin: '0 auto' }}
+                  />
+                  <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                    Scale: 1 pixel = 1 μm | Field of view: 800 × 600 μm
+                    {predictedEfficacy && <span style={{ color: 'var(--red)' }}> | Drug-exposed cells shown in red</span>}
+                  </div>
+                </div>
+
+                {stats && (
+                  <div className="grid grid-4">
+                    <div className="stat-card">
+                      <div className="stat-value">{stats.total}</div>
+                      <div className="stat-label">Total Cells</div>
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-value">{stats.viable}</div>
+                      <div className="stat-label">Viable Cells</div>
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-value">{stats.viability}%</div>
+                      <div className="stat-label">Viability</div>
+                      {predictedEfficacy && (
+                        <div className="stat-trend" style={{ 
+                          color: Math.abs(parseFloat(stats.viability) - parseFloat(predictedEfficacy.viability)) < 10 ? 'var(--green)' : 'var(--yellow)'
+                        }}>
+                          Target: {predictedEfficacy.viability}%
+                        </div>
+                      )}
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-value">{stats.proliferationRate}</div>
+                      <div className="stat-label">Growth Rate</div>
+                      <div className="stat-trend">cells/day</div>
+                    </div>
+                  </div>
+                )}
+
+                {experimentData.length > 0 && (
+                  <div>
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">📈 Growth Dynamics</h3>
+                      </div>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={experimentData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" />
+                          <XAxis dataKey="time" stroke="var(--text)" label={{ value: 'Time (h)', position: 'insideBottom', offset: -5 }} />
+                          <YAxis stroke="var(--text)" label={{ value: 'Cell Count', angle: -90, position: 'insideLeft' }} />
+                          <Tooltip 
+                            contentStyle={{ background: 'var(--card)', border: '1px solid var(--line)' }}
+                          />
+                          <Legend />
+                          <Line type="monotone" dataKey="total" stroke="#3b82f6" name="Total" strokeWidth={2} dot={false} />
+                          <Line type="monotone" dataKey="viable" stroke="#10b981" name="Viable" strokeWidth={2} dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">🔄 Cell Cycle Distribution</h3>
+                      </div>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart data={experimentData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" />
+                          <XAxis dataKey="time" stroke="var(--text)" />
+                          <YAxis stroke="var(--text)" />
+                          <Tooltip 
+                            contentStyle={{ background: 'var(--card)', border: '1px solid var(--line)' }}
+                          />
+                          <Legend />
+                          <Area type="monotone" dataKey="g1" stackId="1" stroke="#3b82f6" fill="#3b82f6" name="G0/G1" />
+                          <Area type="monotone" dataKey="s" stackId="1" stroke="#10b981" fill="#10b981" name="S" />
+                          <Area type="monotone" dataKey="g2" stackId="1" stroke="#f59e0b" fill="#f59e0b" name="G2/M" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="card">
+                      <div className="card-header">
+                        <h3 className="card-title">📊 Export Data</h3>
+                      </div>
+                      <div className="btn-group">
+                        <button 
+                          className="btn btn-secondary"
+                          onClick={() => exportToJSON(experimentData, 'cell_simulation_data.json')}
+                        >
+                          💾 Export JSON
+                        </button>
+                        <button 
+                          className="btn btn-secondary"
+                          onClick={() => exportToCSV(experimentData, 'cell_simulation_data.csv')}
+                        >
+                          📄 Export CSV
+                        </button>
+                        {dockingResults && predictedEfficacy && (
+                          <button 
+                            className="btn btn-success"
+                            onClick={() => {
+                              const fullReport = {
+                                docking: dockingResults,
+                                prediction: predictedEfficacy,
+                                simulation: {
+                                  cellLine: selectedCellLine,
+                                  data: experimentData,
+                                  finalStats: stats
+                                }
+                              };
+                              exportToJSON(fullReport, 'complete_workflow_report.json');
+                            }}
+                          >
+                            📋 Export Complete Report
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {completedSteps.includes(3) && (
+              <div className="info-panel" style={{ 
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%)',
+                borderColor: 'rgba(16, 185, 129, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--green)', marginBottom: '0.5rem' }}>
+                  Workflow Complete!
+                </div>
+                <div style={{ color: 'var(--text)' }}>
+                  You've successfully completed the integrated drug discovery workflow from 
+                  molecular docking through efficacy prediction to cell-based validation.
+                </div>
+                <div style={{ marginTop: '1.5rem' }}>
+                  <button 
+                    className="btn btn-primary"
+                    onClick={() => {
+                      setCurrentStep(1);
+                      setCompletedSteps([]);
+                      setDockingResults(null);
+                      setPredictedEfficacy(null);
+                      setExperimentData([]);
+                      setCellPopulation([]);
+                    }}
+                  >
+                    🔄 Start New Analysis
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.render(<BioMedResearchSuitePro />, document.getElementById('root'));
+</script>
+
+</body>
+</html>

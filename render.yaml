@@ -1,0 +1,62 @@
+# BioMed Research Suite - Render Deployment Configuration
+# ========================================================
+# Auto-deploy unified platform from GitHub
+
+services:
+  # Unified Backend API Service
+  - type: web
+    name: biomed-research-suite
+    runtime: python
+    region: oregon  # Choose closest to your users
+    plan: free      # Upgrade to paid plan for production workloads
+    branch: main
+    
+    # Build configuration
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn unified_backend:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --access-logfile - --error-logfile -
+    
+    # Health checks
+    healthCheckPath: /api/health
+    
+    # Environment variables
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: PORT
+        generateValue: true
+      - key: RENDER
+        value: true
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: 1
+    
+    # Auto-deploy settings
+    autoDeploy: true
+
+# Optional: Separate static frontend deployment
+# Uncomment if you want to deploy frontend separately from backend
+# - type: web
+#   name: biomed-research-frontend
+#   runtime: static
+#   plan: free
+#   branch: main
+#   buildCommand: echo "No build needed for static HTML"
+#   staticPublishPath: .
+#   routes:
+#     - type: rewrite
+#       source: /*
+#       destination: /unified_biomedical_suite.html
+#   envVars:
+#     - key: API_URL
+#       fromService:
+#         type: web
+#         name: biomed-research-suite
+#         property: host
+
+# Future expansion: Database support
+# databases:
+#   - name: biomed-research-db
+#     databaseName: biomedresearch
+#     plan: free
+#     user: biomeduser

@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioMed Research Suite • Comprehensive Computational Biology Platform</title>
+<meta name="description" content="Unified platform for molecular docking and cell dynamics simulation">
+<meta name="theme-color" content="#0f172a">
+
+<!-- Core Libraries -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<script src="https://unpkg.com/recharts@2/umd/Recharts.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+
+<style>
+:root {
+  --bg: #0a0e1a;
+  --panel: #0f1419;
+  --card: #1a1f2e;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #3b82f6;
+  --accent-bright: #60a5fa;
+  --line: #1e293b;
+  --green: #10b981;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --purple: #8b5cf6;
+  --cyan: #06b6d4;
+  --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Header */
+.app-header {
+  background: var(--panel);
+  border-bottom: 2px solid var(--line);
+  padding: 1.5rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+}
+
+.header-content {
+  max-width: 1800px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-icon {
+  width: 45px;
+  height: 45px;
+  background: var(--gradient-3);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.brand-text h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  background: var(--gradient-3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-text p {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: -2px;
+}
+
+.status-bar {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--card);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Main Container */
+.container {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Module Selector */
+.module-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: var(--panel);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.module-btn {
+  flex: 1;
+  padding: 1.5rem;
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.module-btn:hover {
+  background: var(--line);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.module-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  border-color: var(--accent-bright);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.module-icon {
+  font-size: 2rem;
+}
+
+.module-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.module-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.module-btn.active .module-desc {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.form-select, .form-input {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.form-select:focus, .form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-select option {
+  background: var(--card);
+}
+
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--accent-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.btn-secondary:hover {
+  background: var(--line);
+  border-color: var(--accent);
+}
+
+/* Grid Layouts */
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .module-selector { flex-direction: column; }
+}
+
+/* Progress Bar */
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--green);
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--yellow);
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--red);
+}
+
+.badge-info {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--accent-bright);
+}
+
+/* Stat Cards */
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: var(--gradient-3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Table */
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: var(--bg);
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+th {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent-bright);
+}
+
+tbody tr:hover {
+  background: var(--bg);
+}
+
+/* Canvas */
+canvas {
+  border-radius: 8px;
+  background: var(--bg);
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Alert */
+.alert {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: start;
+  gap: 1rem;
+}
+
+.alert-info {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--accent-bright);
+}
+
+.alert-success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--green);
+}
+
+.alert-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--yellow);
+}
+
+/* Loading Spinner */
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .app-header {
+    padding: 1rem;
+  }
+
+  .brand-text h1 {
+    font-size: 1.2rem;
+  }
+
+  .status-bar {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- App Container -->
+<div id="root"></div>
+
+<!-- React Application -->
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+const { LineChart, Line, BarChart, Bar, AreaChart, Area, ScatterChart, Scatter,
+        RadarChart, Radar, PieChart, Pie, Cell,
+        XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+        PolarGrid, PolarAngleAxis, PolarRadiusAxis } = Recharts;
+
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://127.0.0.1:5000'
+  : '';  // Use same origin in production
+
+// ============================================================================
+// MOLECULAR DOCKING MODULE
+// ============================================================================
+
+const MolecularDockingModule = () => {
+  const [selectedProtein, setSelectedProtein] = useState('');
+  const [selectedLigand, setSelectedLigand] = useState('');
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationProgress, setSimulationProgress] = useState(0);
+  const [dockingResults, setDockingResults] = useState(null);
+  const [activeTab, setActiveTab] = useState('setup');
+
+  // Protein database
+  const proteinDatabase = {
+    '1HVH': { name: 'HIV-1 Protease', pdb: '1HVH', resolution: 1.8, organism: 'HIV-1' },
+    '2OXY': { name: 'Cyclooxygenase-2', pdb: '2OXY', resolution: 2.1, organism: 'Human' },
+    '4DKL': { name: 'μ-opioid receptor', pdb: '4DKL', resolution: 2.8, organism: 'Mouse' },
+    '5R81': { name: 'EGFR Kinase', pdb: '5R81', resolution: 2.3, organism: 'Human' },
+    '6LU7': { name: 'SARS-CoV-2 Mpro', pdb: '6LU7', resolution: 2.16, organism: 'SARS-CoV-2' }
+  };
+
+  // Ligand library
+  const ligandLibrary = {
+    'aspirin': { smiles: 'CC(=O)Oc1ccccc1C(=O)O', mw: 180.16, logP: 1.19 },
+    'ibuprofen': { smiles: 'CC(C)Cc1ccc(cc1)C(C)C(=O)O', mw: 206.28, logP: 3.97 },
+    'morphine': { smiles: 'CN1CCC23C4C1CC5=C2C(=C(C=C5)O)OC3C(C=C4)O', mw: 285.34, logP: 0.89 },
+    'remdesivir': { smiles: 'CCC(CC)COC(=O)C(C)NP(=O)(OCC1C(C(C(O1)C#N)(C(=O)OC)C)O)OC2=CC=CC3=C2N=CN=C3N', mw: 602.58, logP: 1.9 },
+    'dexamethasone': { smiles: 'CC1CC2C3CCC4=CC(=O)C=CC4(C3(C(CC2(C1(C(=O)CO)O)C)O)F)C', mw: 392.46, logP: 1.83 }
+  };
+
+  const runDocking = () => {
+    setIsSimulating(true);
+    setSimulationProgress(0);
+    
+    const interval = setInterval(() => {
+      setSimulationProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          generateDockingResults();
+          setIsSimulating(false);
+          setActiveTab('results');
+          return 100;
+        }
+        return prev + 5;
+      });
+    }, 200);
+  };
+
+  const generateDockingResults = () => {
+    const modes = Array.from({ length: 9 }, (_, i) => ({
+      mode: i + 1,
+      affinity: -8.5 + Math.random() * 4,
+      rmsdLB: Math.random() * 2,
+      rmsdUB: Math.random() * 4,
+      interactions: generateInteractions()
+    }));
+
+    setDockingResults({
+      protein: proteinDatabase[selectedProtein],
+      ligand: ligandLibrary[selectedLigand],
+      timestamp: new Date().toISOString(),
+      modes: modes.sort((a, b) => a.affinity - b.affinity),
+      bestAffinity: Math.min(...modes.map(m => m.affinity)),
+      bindingSite: {
+        volume: (450 + Math.random() * 200).toFixed(1),
+        surface: (320 + Math.random() * 150).toFixed(1),
+        depth: (12 + Math.random() * 6).toFixed(1),
+        hydrophobicity: (Math.random() * 100).toFixed(1),
+        druggability: (0.6 + Math.random() * 0.4).toFixed(3)
+      }
+    });
+  };
+
+  const generateInteractions = () => {
+    const interactionTypes = ['H-bond', 'Hydrophobic', 'π-π stacking', 'π-cation', 'Salt bridge'];
+    const residues = ['TYR181', 'LYS103', 'ASP25', 'GLY27', 'ILE50', 'VAL82', 'THR80'];
+    
+    return Array.from({ length: 3 + Math.floor(Math.random() * 4) }, () => ({
+      type: interactionTypes[Math.floor(Math.random() * interactionTypes.length)],
+      residue: residues[Math.floor(Math.random() * residues.length)],
+      distance: (2.5 + Math.random() * 2).toFixed(2),
+      energy: (-Math.random() * 3).toFixed(2)
+    }));
+  };
+
+  return (
+    <div>
+      {/* Setup Section */}
+      {activeTab === 'setup' && (
+        <div className="grid grid-2">
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">🧬 Protein Selection</h3>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Select Target Protein</label>
+              <select 
+                className="form-select"
+                value={selectedProtein}
+                onChange={(e) => setSelectedProtein(e.target.value)}
+              >
+                <option value="">Choose protein...</option>
+                {Object.entries(proteinDatabase).map(([id, protein]) => (
+                  <option key={id} value={id}>
+                    {protein.name} ({protein.pdb}) - {protein.organism}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedProtein && (
+              <div className="alert alert-info">
+                <div>
+                  <strong>Protein Details:</strong><br/>
+                  Resolution: {proteinDatabase[selectedProtein].resolution} Å<br/>
+                  Organism: {proteinDatabase[selectedProtein].organism}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">💊 Ligand Selection</h3>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Select Ligand Compound</label>
+              <select 
+                className="form-select"
+                value={selectedLigand}
+                onChange={(e) => setSelectedLigand(e.target.value)}
+              >
+                <option value="">Choose ligand...</option>
+                {Object.entries(ligandLibrary).map(([id, ligand]) => (
+                  <option key={id} value={id}>
+                    {id.charAt(0).toUpperCase() + id.slice(1)} - MW: {ligand.mw} g/mol
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedLigand && (
+              <div className="alert alert-info">
+                <div>
+                  <strong>Ligand Properties:</strong><br/>
+                  Molecular Weight: {ligandLibrary[selectedLigand].mw} g/mol<br/>
+                  LogP: {ligandLibrary[selectedLigand].logP}<br/>
+                  SMILES: {ligandLibrary[selectedLigand].smiles.substring(0, 40)}...
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Control Panel */}
+      <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">⚙️ Docking Control</h3>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button
+            className="btn btn-primary"
+            onClick={runDocking}
+            disabled={!selectedProtein || !selectedLigand || isSimulating}
+          >
+            {isSimulating ? (
+              <>
+                <div className="spinner"></div>
+                Running Simulation...
+              </>
+            ) : (
+              <>
+                ▶️ Run Docking Simulation
+              </>
+            )}
+          </button>
+
+          {isSimulating && (
+            <div style={{ flex: 1 }}>
+              <div className="progress-container">
+                <div className="progress-bar" style={{ width: `${simulationProgress}%` }}></div>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+                Progress: {simulationProgress}%
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Results Section */}
+      {dockingResults && activeTab === 'results' && (
+        <div>
+          {/* Summary Stats */}
+          <div className="grid grid-4">
+            <div className="stat-card">
+              <div className="stat-value">{dockingResults.bestAffinity.toFixed(2)}</div>
+              <div className="stat-label">Best Affinity (kcal/mol)</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{dockingResults.modes.length}</div>
+              <div className="stat-label">Binding Modes</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{dockingResults.bindingSite.volume}</div>
+              <div className="stat-label">Pocket Volume (Å³)</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{dockingResults.bindingSite.druggability}</div>
+              <div className="stat-label">Druggability Score</div>
+            </div>
+          </div>
+
+          {/* Binding Modes Table */}
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">📊 Binding Modes</h3>
+            </div>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mode</th>
+                    <th>Affinity (kcal/mol)</th>
+                    <th>RMSD l.b. (Å)</th>
+                    <th>RMSD u.b. (Å)</th>
+                    <th>Interactions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dockingResults.modes.map((mode) => (
+                    <tr key={mode.mode}>
+                      <td>{mode.mode}</td>
+                      <td>
+                        <span className="badge badge-success">{mode.affinity.toFixed(2)}</span>
+                      </td>
+                      <td>{mode.rmsdLB.toFixed(2)}</td>
+                      <td>{mode.rmsdUB.toFixed(2)}</td>
+                      <td>{mode.interactions.length}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Interactions */}
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">🔗 Protein-Ligand Interactions (Best Mode)</h3>
+            </div>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Residue</th>
+                    <th>Distance (Å)</th>
+                    <th>Energy (kcal/mol)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dockingResults.modes[0].interactions.map((interaction, idx) => (
+                    <tr key={idx}>
+                      <td>
+                        <span className="badge badge-info">{interaction.type}</span>
+                      </td>
+                      <td>{interaction.residue}</td>
+                      <td>{interaction.distance}</td>
+                      <td>{interaction.energy}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Binding Energy Chart */}
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">📈 Binding Affinity Distribution</h3>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={dockingResults.modes}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" />
+                <XAxis dataKey="mode" stroke="var(--text)" />
+                <YAxis stroke="var(--text)" />
+                <Tooltip 
+                  contentStyle={{ background: 'var(--card)', border: '1px solid var(--line)' }}
+                />
+                <Bar dataKey="affinity" fill="var(--accent)" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// CELL DYNAMICS MODULE
+// ============================================================================
+
+const CellDynamicsModule = () => {
+  const [selectedCellLine, setSelectedCellLine] = useState('HeLa');
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [experimentData, setExperimentData] = useState([]);
+  const [cellPopulation, setCellPopulation] = useState([]);
+  const [simulationTime, setSimulationTime] = useState(0);
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+
+  const cellLineDatabase = {
+    'HeLa': {
+      type: 'Cancer',
+      origin: 'Cervical',
+      doublingTime: 24,
+      applications: ['Cancer research', 'Virology', 'Drug screening']
+    },
+    'MCF-7': {
+      type: 'Cancer',
+      origin: 'Breast adenocarcinoma',
+      doublingTime: 29,
+      applications: ['Breast cancer', 'Hormone studies', 'Drug resistance']
+    },
+    'A549': {
+      type: 'Cancer',
+      origin: 'Lung carcinoma',
+      doublingTime: 22,
+      applications: ['Lung cancer', 'Drug metabolism', 'Toxicology']
+    },
+    'HEK293': {
+      type: 'Normal',
+      origin: 'Embryonic kidney',
+      doublingTime: 20,
+      applications: ['Protein production', 'Viral vectors', 'Transfection']
+    }
+  };
+
+  const startSimulation = () => {
+    setIsSimulating(true);
+    setSimulationTime(0);
+    setExperimentData([]);
+    
+    // Initialize cells
+    const initialCells = Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 750 + 25,
+      y: Math.random() * 550 + 25,
+      radius: 8 + Math.random() * 4,
+      health: 0.9 + Math.random() * 0.1,
+      phase: 'G1',
+      alive: true
+    }));
+    
+    setCellPopulation(initialCells);
+    
+    // Simulation loop
+    let time = 0;
+    const interval = setInterval(() => {
+      time += 0.5;
+      setSimulationTime(time);
+      
+      // Update cells
+      setCellPopulation(prev => {
+        const newCells = [...prev];
+        
+        // Cell division
+        if (newCells.length < 500 && Math.random() < 0.05) {
+          const parentIdx = Math.floor(Math.random() * newCells.length);
+          const parent = newCells[parentIdx];
+          if (parent.alive) {
+            newCells.push({
+              id: Date.now() + Math.random(),
+              x: parent.x + (Math.random() - 0.5) * 20,
+              y: parent.y + (Math.random() - 0.5) * 20,
+              radius: 8 + Math.random() * 4,
+              health: parent.health * 0.95,
+              phase: 'G1',
+              alive: true
+            });
+          }
+        }
+        
+        // Cell movement
+        return newCells.map(cell => ({
+          ...cell,
+          x: Math.max(25, Math.min(775, cell.x + (Math.random() - 0.5) * 2)),
+          y: Math.max(25, Math.min(575, cell.y + (Math.random() - 0.5) * 2))
+        }));
+      });
+      
+      // Record data
+      setExperimentData(prev => {
+        const viable = cellPopulation.filter(c => c.alive).length;
+        return [...prev, {
+          time,
+          total: cellPopulation.length,
+          viable,
+          viability: (viable / cellPopulation.length * 100) || 0
+        }];
+      });
+      
+      if (time >= 72) {
+        clearInterval(interval);
+        setIsSimulating(false);
+      }
+    }, 100);
+  };
+
+  // Canvas rendering
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const animate = () => {
+      // Clear canvas
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, 800, 600);
+      
+      // Draw grid
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < 800; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, 600);
+        ctx.stroke();
+      }
+      for (let i = 0; i < 600; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(800, i);
+        ctx.stroke();
+      }
+      
+      // Draw cells
+      cellPopulation.forEach(cell => {
+        if (cell.alive) {
+          const gradient = ctx.createRadialGradient(cell.x, cell.y, 0, cell.x, cell.y, cell.radius);
+          gradient.addColorStop(0, `rgba(59, 130, 246, ${cell.health})`);
+          gradient.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+          
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(cell.x, cell.y, cell.radius, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Cell membrane
+          ctx.strokeStyle = `rgba(96, 165, 250, ${cell.health})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      });
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animate();
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [cellPopulation]);
+
+  const stats = useMemo(() => {
+    if (!cellPopulation.length) return null;
+    const viable = cellPopulation.filter(c => c.alive);
+    return {
+      total: cellPopulation.length,
+      viable: viable.length,
+      viability: ((viable.length / cellPopulation.length) * 100).toFixed(1),
+      avgHealth: (viable.reduce((sum, c) => sum + c.health, 0) / viable.length * 100).toFixed(1)
+    };
+  }, [cellPopulation]);
+
+  return (
+    <div>
+      {/* Cell Line Selection */}
+      <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">🧫 Cell Line Selection</h3>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Select Cell Line</label>
+          <select 
+            className="form-select"
+            value={selectedCellLine}
+            onChange={(e) => setSelectedCellLine(e.target.value)}
+          >
+            {Object.entries(cellLineDatabase).map(([id, cell]) => (
+              <option key={id} value={id}>
+                {id} - {cell.origin} ({cell.type}) - DT: {cell.doublingTime}h
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {selectedCellLine && (
+          <div className="alert alert-info">
+            <div>
+              <strong>Cell Line Info:</strong><br/>
+              Type: {cellLineDatabase[selectedCellLine].type}<br/>
+              Origin: {cellLineDatabase[selectedCellLine].origin}<br/>
+              Doubling Time: {cellLineDatabase[selectedCellLine].doublingTime} hours<br/>
+              Applications: {cellLineDatabase[selectedCellLine].applications.join(', ')}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Control Panel */}
+      <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">⚙️ Experiment Control</h3>
+        </div>
+        <button
+          className="btn btn-primary"
+          onClick={startSimulation}
+          disabled={isSimulating}
+        >
+          {isSimulating ? (
+            <>
+              <div className="spinner"></div>
+              Simulating... {simulationTime.toFixed(1)}h
+            </>
+          ) : (
+            <>
+              ▶️ Start Cell Culture Simulation
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Live Visualization */}
+      <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">👁️ Live Cell Culture</h3>
+        </div>
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={600}
+          style={{ width: '100%', maxWidth: '800px', display: 'block', margin: '0 auto' }}
+        />
+        <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+          Scale: 1 pixel = 1 μm | Field of view: 800 × 600 μm
+        </div>
+      </div>
+
+      {/* Statistics */}
+      {stats && (
+        <div className="grid grid-4">
+          <div className="stat-card">
+            <div className="stat-value">{stats.total}</div>
+            <div className="stat-label">Total Cells</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{stats.viable}</div>
+            <div className="stat-label">Viable Cells</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{stats.viability}%</div>
+            <div className="stat-label">Viability</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{stats.avgHealth}%</div>
+            <div className="stat-label">Avg Health</div>
+          </div>
+        </div>
+      )}
+
+      {/* Growth Chart */}
+      {experimentData.length > 0 && (
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">📈 Growth Curve</h3>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={experimentData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" />
+              <XAxis dataKey="time" stroke="var(--text)" label={{ value: 'Time (h)', position: 'insideBottom', offset: -5 }} />
+              <YAxis stroke="var(--text)" label={{ value: 'Cell Count', angle: -90, position: 'insideLeft' }} />
+              <Tooltip 
+                contentStyle={{ background: 'var(--card)', border: '1px solid var(--line)' }}
+              />
+              <Legend />
+              <Line type="monotone" dataKey="total" stroke="#3b82f6" name="Total" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="viable" stroke="#10b981" name="Viable" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// MAIN APPLICATION
+// ============================================================================
+
+const BioMedResearchSuite = () => {
+  const [activeModule, setActiveModule] = useState('docking');
+
+  return (
+    <div>
+      {/* Header */}
+      <header className="app-header">
+        <div className="header-content">
+          <div className="brand">
+            <div className="brand-icon">🧬</div>
+            <div className="brand-text">
+              <h1>BioMed Research Suite</h1>
+              <p>Comprehensive Computational Biology Platform</p>
+            </div>
+          </div>
+          <div className="status-bar">
+            <div className="status-item">
+              <div className="status-dot"></div>
+              <span>System Online</span>
+            </div>
+            <div className="status-item">
+              <span>v2.0</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="container">
+        {/* Module Selector */}
+        <div className="module-selector">
+          <button
+            className={`module-btn ${activeModule === 'docking' ? 'active' : ''}`}
+            onClick={() => setActiveModule('docking')}
+          >
+            <div className="module-icon">⚛️</div>
+            <div className="module-title">Molecular Docking</div>
+            <div className="module-desc">Protein-ligand binding simulation & analysis</div>
+          </button>
+          
+          <button
+            className={`module-btn ${activeModule === 'cells' ? 'active' : ''}`}
+            onClick={() => setActiveModule('cells')}
+          >
+            <div className="module-icon">🧫</div>
+            <div className="module-title">Cell Dynamics</div>
+            <div className="module-desc">Cell culture simulation & visualization</div>
+          </button>
+        </div>
+
+        {/* Active Module Content */}
+        {activeModule === 'docking' && <MolecularDockingModule />}
+        {activeModule === 'cells' && <CellDynamicsModule />}
+      </div>
+    </div>
+  );
+};
+
+// Render the application
+ReactDOM.render(<BioMedResearchSuite />, document.getElementById('root'));
+</script>
+
+</body>
+</html>

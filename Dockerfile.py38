@@ -1,0 +1,64 @@
+# Dockerfile for BioMed Research Suite - Python 3.8.1 Version
+# =============================================================
+FROM python:3.8.1-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=5000 \
+    PYTHON_VERSION=3.8.1
+
+# Install system dependencies including build tools
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    gfortran \
+    libopenblas-dev \
+    liblapack-dev \
+    libatlas-base-dev \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY requirements-py38.txt requirements.txt
+
+# Upgrade pip and install Python dependencies with specific versions for Python 3.8.1
+RUN python -m pip install --no-cache-dir --upgrade pip==21.3.1 && \
+    python -m pip install --no-cache-dir setuptools==60.2.0 wheel==0.37.1 && \
+    python -m pip install --no-cache-dir numpy==1.19.5 && \
+    python -m pip install --no-cache-dir scipy==1.6.1 && \
+    python -m pip install --no-cache-dir Flask==2.2.5 && \
+    python -m pip install --no-cache-dir flask-cors==4.0.0 && \
+    python -m pip install --no-cache-dir gunicorn==20.1.0 && \
+    python -m pip install --no-cache-dir Werkzeug==2.2.3
+
+# Copy application files
+COPY unified_backend.py .
+COPY *.html ./static/
+COPY *.md ./docs/
+
+# Create a non-root user for security
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Expose port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:5000/api/health || exit 1
+
+# Run with Python 3.8 compatible settings
+CMD ["python", "-m", "gunicorn", "unified_backend:app", \
+     "--bind", "0.0.0.0:5000", \
+     "--workers", "2", \
+     "--threads", "2", \
+     "--timeout", "120", \
+     "--keep-alive", "5", \
+     "--log-level", "info", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-"]

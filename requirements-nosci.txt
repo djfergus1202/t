@@ -1,0 +1,15 @@
+# BioMed Research Suite - Emergency Requirements (No SciPy)
+# This version removes scipy to fix Render deployment issues
+
+# Core Web Framework
+Flask==3.0.3
+Werkzeug==3.0.1
+
+# CORS Support
+flask-cors==5.0.0
+
+# Scientific Computing (NumPy only)
+numpy==1.26.4
+
+# Production WSGI Server
+gunicorn==22.0.0

@@ -1,0 +1,17 @@
+# BioMed Research Suite - Production Dependencies
+# ================================================
+# Compatible with Python 3.8.1
+
+# Core Web Framework
+Flask==2.2.5        # Last version supporting Python 3.8
+Werkzeug==2.2.3     # Compatible with Flask 2.2.x
+
+# CORS Support
+flask-cors==4.0.0   # Works with Python 3.8
+
+# Scientific Computing Stack
+numpy==1.19.5       # Best version for Python 3.8
+scipy==1.6.1        # Compatible with Python 3.8 and numpy 1.19
+
+# Production WSGI Server
+gunicorn==20.1.0    # Stable for Python 3.8

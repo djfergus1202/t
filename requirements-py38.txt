@@ -1,0 +1,21 @@
+# BioMed Research Suite - Requirements for Python 3.8.1
+# =====================================================
+# These versions are specifically tested for Python 3.8.1 compatibility
+
+# Core Web Framework
+Flask==2.2.5        # Last version supporting Python 3.8
+Werkzeug==2.2.3     # Compatible with Flask 2.2.x
+
+# CORS Support  
+flask-cors==4.0.0   # Works with Python 3.8
+
+# Scientific Computing Stack
+numpy==1.19.5       # Last version for Python 3.8 with good compatibility
+scipy==1.6.1        # Compatible with Python 3.8 and numpy 1.19.x
+
+# Production WSGI Server
+gunicorn==20.1.0    # Stable version for Python 3.8
+
+# Additional dependencies for Python 3.8 compatibility
+typing-extensions==4.5.0  # Backports for Python 3.8
+importlib-metadata==6.0.0  # Needed for some packages on 3.8

@@ -1,0 +1,20 @@
+# helm-chart/Chart.yaml
+apiVersion: v2
+name: biomed-suite
+description: Professional BioMed Research Suite - Molecular Docking & Cell Simulation Platform
+type: application
+version: 3.0.1
+appVersion: "3.0"
+keywords:
+  - biomed
+  - molecular-docking
+  - cell-simulation
+  - drug-discovery
+  - computational-biology
+home: https://github.com/yourusername/biomed-suite
+sources:
+  - https://github.com/yourusername/biomed-suite
+maintainers:
+  - name: BioMed Team
+    email: support@biomed-suite.com
+dependencies: []
